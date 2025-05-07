@@ -1,0 +1,47 @@
+networks:
+  myappnetwork:
+    driver: bridge
+
+volumes:
+  volume_data_test:
+    driver: local
+
+services:
+  mysql:
+    container_name: mysql-container
+    image: mysql:8.0
+    volumes:
+      - volume_data_test:/var/lib/mysql
+      - ./my.cnf:/etc/mysql/my.cnf
+    environment:
+      MYSQL_DATABASE: online_shop_api_db
+      MYSQL_ROOT_PASSWORD: root
+    ports:
+      - "3307:3306"
+    networks:
+      - myappnetwork
+    restart: always
+
+  service:
+    container_name: service-container
+    image: "oliver005/online_shop_api:26.04.2025.19.19.45"
+    ports:
+      - "8080:8080"
+    restart: always
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+    depends_on:
+      - mysql
+    networks:
+      - myappnetwork
+
+  client:
+    container_name: client-container
+    image: "oliver005/online-shop-react:27.04.2025.18.30.27"
+    ports:
+      - "80:80"
+    restart: always
+    depends_on:
+      - service
+    networks:
+      - myappnetwork
