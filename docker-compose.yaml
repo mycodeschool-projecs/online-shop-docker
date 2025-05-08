@@ -24,7 +24,7 @@ services:
 
   service:
     container_name: service-container
-    image: "oliver005/online_shop_api:26.04.2025.19.19.45"
+    image: "mycodeschool/online-shop-api:07.05.2025.16.01.39-prod"
     ports:
       - "8080:8080"
     restart: always
@@ -37,7 +37,7 @@ services:
 
   client:
     container_name: client-container
-    image: "oliver005/online-shop-react:27.04.2025.18.30.27"
+    image: "mycodeschool/online-shop-client:08.05.2025.23.29.21-dev"
     ports:
       - "80:80"
     restart: always
