@@ -1,15 +1,9 @@
-networks:
-  myappnetwork:
-    driver: bridge
-
-volumes:
-  volume_data_test:
-    driver: local
+version: "3.9"
 
 services:
   mysql:
-    container_name: mysql-container
     image: mysql:8.0
+    container_name: mysql-container
     volumes:
       - volume_data_test:/var/lib/mysql
       - ./my.cnf:/etc/mysql/my.cnf
@@ -21,27 +15,38 @@ services:
     networks:
       - myappnetwork
     restart: always
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-proot"]
+      interval: 10s
+      retries: 5
 
   service:
+    image: mycodeschool/online-shop-api:${API_TAG}
     container_name: service-container
-    image: "mycodeschool/online-shop-api:07.05.2025.16.01.39-prod"
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
     ports:
       - "8080:8080"
-    restart: always
-    environment:
-      - SPRING_PROFILES_ACTIVE=docker
     depends_on:
-      - mysql
+      mysql:
+        condition: service_healthy
     networks:
       - myappnetwork
+    restart: always
 
   client:
+    image: mycodeschool/online-shop-client:${CLIENT_TAG}
     container_name: client-container
-    image: "mycodeschool/online-shop-client:08.05.2025.23.29.21-dev"
     ports:
-      - "80:80"
-    restart: always
+      - "3000:80"
     depends_on:
       - service
     networks:
       - myappnetwork
+    restart: always
+
+volumes:
+  volume_data_test:
+
+networks:
+  myappnetwork:
